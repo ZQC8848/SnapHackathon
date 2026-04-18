@@ -1,8 +1,16 @@
+<<<<<<< LOCAL
 - !<Material/8f91d993-eb2d-4a01-aace-23a048bbe6d2>
   PackagePath: ""
   PassesInfo:
     - !<own> 733c9bb6-7e9a-4aa1-ab53-77ad97343dea
 - !<PassInfo/733c9bb6-7e9a-4aa1-ab53-77ad97343dea>
+=======
+- !<Material/46f9da4a-b30c-4e7d-bef6-2a200c78060f>
+  PackagePath: ""
+  PassesInfo:
+    - !<own> 3baf789b-7492-4fa4-bb73-dcee80634383
+- !<PassInfo/3baf789b-7492-4fa4-bb73-dcee80634383>
+>>>>>>> REMOTE
   CachedProperties:
     - InnerEdgeTex:
         typeIdx: 9
@@ -247,4 +255,8 @@
     outerEdgeStartingColor:
       typeIdx: 5
       value: {x: 0.130000, y: 1.000000, z: 0.820000, w: 1.000000}
+<<<<<<< LOCAL
   Pass: !<reference> 2157f0c0-e651-4fb2-ae2f-f2b008bb101d
+=======
+  Pass: !<reference> bd1536a0-9b5f-4751-a301-cef2fdd76b0b
+>>>>>>> REMOTE
