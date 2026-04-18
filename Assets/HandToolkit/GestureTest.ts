@@ -22,22 +22,9 @@ const FIST_POLICY: Policy = {
       hand: 'any',
       // Phase 0: fist to start recording, Phase 1: open hand to end
       // Make a fist, swipe top-right to bottom-left, then open hand
-      phases: [
-        {
-          conditions: [
-            { type: 'finger_shape', finger: 'index',  metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
-            { type: 'finger_shape', finger: 'middle', metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
-          ],
-          min_ms: 0,
-        },
-        {
-          conditions: [
-            { type: 'finger_shape', finger: 'index',  metric: 'fullCurl', target: 0.1, upperTolerance: 0.15, lowerTolerance: 0.1 },
-            { type: 'finger_shape', finger: 'middle', metric: 'fullCurl', target: 0.1, upperTolerance: 0.15, lowerTolerance: 0.1 },
-          ],
-          min_ms: 0,
-          timeout_ms: 2000,
-        },
+      conditions: [
+        { type: 'finger_shape', finger: 'index',  metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
+        { type: 'finger_shape', finger: 'middle', metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
       ],
       // Template: straight line from top-right (+X+Y) to bottom-left (-X-Y)
       trajectory: [
@@ -52,6 +39,24 @@ const FIST_POLICY: Policy = {
         { x: -0.6, y: -0.6, z: 0 },
         { x: -0.8, y: -0.8, z: 0 },
         { x: -1.0, y: -1.0, z: 0 },
+      ],
+      similarity_threshold: 0.85,
+    },
+    {
+      tag: 'push_forward',
+      hand: 'any',
+      conditions: [
+        { type: 'finger_shape', finger: 'index',  metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
+        { type: 'finger_shape', finger: 'middle', metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
+      ],
+      // Template: straight line from back (+Z) to front (-Z)
+      trajectory: [
+        { x: 0, y: 0, z:  1.0 },
+        { x: 0, y: 0, z:  0.6 },
+        { x: 0, y: 0, z:  0.2 },
+        { x: 0, y: 0, z: -0.2 },
+        { x: 0, y: 0, z: -0.6 },
+        { x: 0, y: 0, z: -1.0 },
       ],
       similarity_threshold: 0.85,
     },

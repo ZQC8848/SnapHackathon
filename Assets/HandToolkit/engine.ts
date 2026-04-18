@@ -7,7 +7,7 @@ import type {
   NormalizedHand,
   GestureDefinition,
   DynamicGesture,
-  Phase,
+  Condition,
 } from "./types.js"
 import { evaluateGesture, evaluateCondition } from "./evaluator"
 import { similarity } from "./trajectory"
@@ -195,19 +195,16 @@ export class PolicyEngine {
 // ---------------------------------------------------------------------------
 
 const TRAJECTORY_MAX_LEN = 600   // ~10 s at 60 fps
-const DYNAMIC_PHASE_THRESHOLD = 0.6
+const DYNAMIC_ENTER_THRESHOLD = 0.7  // score must reach this to start recording
+const DYNAMIC_EXIT_THRESHOLD  = 0.4  // score must drop below this to stop recording
 
 interface DynamicTrack {
-  /** Which phase we are currently trying to satisfy. */
-  phaseIndex: number
-  /** When current phase's conditions first exceeded the threshold. */
-  phaseActiveAt: number | null
-  /** When we transitioned INTO the current phase (used for timeout). */
-  phaseTransitionedAt: number | null
+  /** Whether the trigger gesture is currently being held. */
+  isRecording: boolean
+  /** Index into trajectoryBuffer when recording started. */
+  recordStartIndex: number
   /** Rolling buffer of wrist world-positions (Vec3). */
   trajectoryBuffer: Array<{ x: number; y: number; z: number }>
-  /** Index into trajectoryBuffer recorded when phase 0 completed. */
-  trajStartIndex: number
 }
 
 export class DynamicEngine {
@@ -240,10 +237,10 @@ export class DynamicEngine {
         track.trajectoryBuffer.push({ x: wrist.x, y: wrist.y, z: wrist.z })
         if (track.trajectoryBuffer.length > TRAJECTORY_MAX_LEN) {
           track.trajectoryBuffer.shift()
-          if (track.trajStartIndex > 0) track.trajStartIndex--
+          if (track.recordStartIndex > 0) track.recordStartIndex--
         }
 
-        const result = this._advanceTrack(gesture, track, hand, now, side)
+        const result = this._advanceTrack(gesture, track, hand, side)
         if (result !== null) results.push(result)
       }
     }
@@ -274,7 +271,7 @@ export class DynamicEngine {
   private _getOrCreateTrack(key: string): DynamicTrack {
     let t = this.tracks.get(key)
     if (t === undefined) {
-      t = { phaseIndex: 0, phaseActiveAt: null, phaseTransitionedAt: null, trajectoryBuffer: [], trajStartIndex: 0 }
+      t = { isRecording: false, recordStartIndex: 0, trajectoryBuffer: [] }
       this.tracks.set(key, t)
     }
     return t
@@ -284,85 +281,52 @@ export class DynamicEngine {
     gesture: DynamicGesture,
     track: DynamicTrack,
     hand: NormalizedHand,
-    now: number,
     side: "left" | "right",
   ): GestureResult | null {
-    const phase: Phase | undefined = gesture.phases[track.phaseIndex]
-    if (phase === undefined) return null
+    const score = this._evaluateConditions(gesture.conditions, hand)
+    const entering = !track.isRecording && score >= DYNAMIC_ENTER_THRESHOLD
+    const exiting  =  track.isRecording && score <  DYNAMIC_EXIT_THRESHOLD
 
-    // Timeout: if a non-start phase takes too long, reset
-    if (track.phaseIndex > 0 && phase.timeout_ms !== undefined && track.phaseTransitionedAt !== null) {
-      if (now - track.phaseTransitionedAt > phase.timeout_ms) {
-        this._resetTrack(track)
-        return null
-      }
+    if (entering) {
+      // Entering gesture — start recording
+      track.isRecording = true
+      track.recordStartIndex = Math.max(0, track.trajectoryBuffer.length - 1)
+      print(`[DynamicEngine] ${gesture.tag} START at bufferIdx=${track.recordStartIndex}`)
+      return { tag: gesture.tag, confidence: score, hand: side, state: "began" }
     }
 
-    // Score current phase
-    const score = this._evaluatePhase(phase, hand)
-    const active = score >= DYNAMIC_PHASE_THRESHOLD
-    // print(`[DEBUG] ${gesture.tag} phase=${track.phaseIndex} score=${score.toFixed(2)} active=${active}`)
-
-    if (active) {
-      if (track.phaseActiveAt === null) track.phaseActiveAt = now
-      const minMs = phase.min_ms ?? 0
-
-      if (now - track.phaseActiveAt < minMs) return null   // still holding
-
-      // ── Phase completed ──────────────────────────────────────────────────
-      const completedIndex = track.phaseIndex
-      const isLast = completedIndex === gesture.phases.length - 1
-
-      if (completedIndex === 0) {
-        // Record trajectory start at the moment the start gesture is confirmed
-        track.trajStartIndex = Math.max(0, track.trajectoryBuffer.length - 1)
-        print(`[DynamicEngine] ${gesture.tag} START recorded at bufferIdx=${track.trajStartIndex}`)
-      }
-
-      if (isLast) {
-        // End gesture confirmed — check trajectory similarity
-        const slice = track.trajectoryBuffer.slice(track.trajStartIndex)
-        const threshold = gesture.similarity_threshold ?? 0.7
-        const sim = similarity(slice, gesture.trajectory)
-        print(`[DynamicEngine] ${gesture.tag} END — slice=${slice.length}pts sim=${sim.toFixed(3)} threshold=${threshold}`)
-        this._resetTrack(track)
-        if (sim >= threshold) {
-          return { tag: gesture.tag, confidence: sim, hand: side, state: "ended" }
-        }
-        return null
-      }
-
-      // Advance to next phase
-      track.phaseIndex++
-      track.phaseActiveAt = null
-      track.phaseTransitionedAt = now
-
-      const state: GestureState = completedIndex === 0 ? "began" : "changed"
-      return { tag: gesture.tag, confidence: score, hand: side, state }
+    if (track.isRecording && !exiting) {
+      // Still holding gesture — recording in progress
+      return { tag: gesture.tag, confidence: score, hand: side, state: "changed" }
     }
 
-    // Conditions not met
-    if (track.phaseIndex === 0) {
-      // Start phase: reset hold timer on any gap
-      track.phaseActiveAt = null
+    if (exiting) {
+      // Exiting gesture — stop and check trajectory
+      track.isRecording = false
+      const slice = track.trajectoryBuffer.slice(track.recordStartIndex)
+      const threshold = gesture.similarity_threshold ?? 0.7
+      const sim = similarity(slice, gesture.trajectory)
+      print(`[DynamicEngine] ${gesture.tag} END — slice=${slice.length}pts sim=${sim.toFixed(3)} threshold=${threshold}`)
+      if (sim >= threshold) {
+        return { tag: gesture.tag, confidence: sim, hand: side, state: "ended" }
+      }
+      return null
     }
-    // Mid/end phases: keep phaseActiveAt; timeout handles regression if gap is too long
 
+    // Not active, not recording — idle
     return null
   }
 
-  private _evaluatePhase(phase: Phase, hand: NormalizedHand): number {
-    if (phase.conditions.length === 0) return 1.0
+  private _evaluateConditions(conditions: Condition[], hand: NormalizedHand): number {
+    if (conditions.length === 0) return 1.0
     let sum = 0
-    for (const c of phase.conditions) sum += evaluateCondition(c, hand)
-    return sum / phase.conditions.length
+    for (const c of conditions) sum += evaluateCondition(c, hand)
+    return sum / conditions.length
   }
 
   private _resetTrack(track: DynamicTrack): void {
-    track.phaseIndex = 0
-    track.phaseActiveAt = null
-    track.phaseTransitionedAt = null
-    track.trajStartIndex = 0
+    track.isRecording = false
+    track.recordStartIndex = 0
     // trajectoryBuffer kept — recording is always continuous
   }
 }
