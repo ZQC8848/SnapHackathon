@@ -1,0 +1,59 @@
+- !<AssetImportMetadata/ce2df12e-6da4-4cde-8cc8-b2df74064eed>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> d1d476a5-0352-4748-8ba0-f0acaee9eaa5
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> d1d476a5-0352-4748-8ba0-f0acaee9eaa5
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 3104cecc-7dca-4358-a1c1-c1a1a0e57c4a
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/3104cecc-7dca-4358-a1c1-c1a1a0e57c4a>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: eca8e505-e442-4d6a-8ba4-df14e8317f30
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    autoStartRecording: false
+    countdownSeconds: false
+    enableLogging: false
+    recordingSeconds: false
+    sender: false
+    statusText: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - sender: !<MappingBased.AssignableType> 00000000-0000-0000-0000-000000000000
+      countdownSeconds: !<float> 3.000000
+      recordingSeconds: !<float> 3.000000
+      autoStartRecording: false
+      statusText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      enableLogging: true
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @input AssignableType sender {"hint":"Reference to SendMsgToServer component used for transport"}'
+    - '// @input float countdownSeconds = 3 {"hint":"Countdown seconds before recording starts"}'
+    - '// @input float recordingSeconds = 3 {"hint":"Recording duration in seconds"}'
+    - '// @input bool autoStartRecording {"hint":"Start recording automatically on start"}'
+    - '// @input Component.Text statusText {"hint":"Optional Text component for recording status"}'
+    - '// @input bool enableLogging = true {"hint":"Enable debug logs"}'
