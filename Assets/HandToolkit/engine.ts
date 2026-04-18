@@ -319,11 +319,11 @@ export class DynamicEngine {
       const tMag = Math.sqrt(tDir.x ** 2 + tDir.y ** 2 + tDir.z ** 2)
       const aMag = Math.sqrt(aDir.x ** 2 + aDir.y ** 2 + aDir.z ** 2)
       const cosine = (tMag > 0 && aMag > 0) ? dot / (tMag * aMag) : 0
-      const dirMatch = cosine > 0.7
 
-      print(`[DynamicEngine] ${gesture.tag} END — slice=${slice.length}pts sim=${sim.toFixed(3)} dir=${cosine.toFixed(2)} threshold=${threshold}`)
-      if (sim >= threshold && dirMatch) {
-        return { tag: gesture.tag, confidence: sim, hand: side, state: "ended" }
+      print(`[DynamicEngine] ${gesture.tag} END — sim=${sim.toFixed(3)} dir=${cosine.toFixed(2)} threshold=${threshold}`)
+      if (sim >= threshold) {
+        // confidence = cosine so multiple gestures are ranked by direction match
+        return { tag: gesture.tag, confidence: cosine, hand: side, state: "ended" }
       }
       return null
     }
