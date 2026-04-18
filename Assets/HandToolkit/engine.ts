@@ -216,6 +216,7 @@ export class DynamicEngine {
 
   constructor(gestures: DynamicGesture[]) {
     this.gestures = gestures
+    print(`[DEBUG] DynamicEngine created — gestures: ${gestures.length}`)
   }
 
   loadGestures(gestures: DynamicGesture[]): void {
@@ -227,14 +228,16 @@ export class DynamicEngine {
     const results: GestureResult[] = []
     const now = frame.timestamp
 
+    // print(`[DEBUG] DynamicEngine.process — gestures=${this.gestures.length}`)
+
     for (const gesture of this.gestures) {
       for (const { hand, side } of this._resolveHands(gesture, frame)) {
         const key = makeKey(gesture.tag, side)
         const track = this._getOrCreateTrack(key)
 
-        // Always record wrist position — continuous trajectory capture
-        const w = hand.joints.wrist
-        track.trajectoryBuffer.push({ x: w.x, y: w.y, z: w.z })
+        // Always append wrist position to trajectory buffer
+        const wrist = hand.joints["wrist"]
+        track.trajectoryBuffer.push({ x: wrist.x, y: wrist.y, z: wrist.z })
         if (track.trajectoryBuffer.length > TRAJECTORY_MAX_LEN) {
           track.trajectoryBuffer.shift()
           if (track.trajStartIndex > 0) track.trajStartIndex--
@@ -298,6 +301,7 @@ export class DynamicEngine {
     // Score current phase
     const score = this._evaluatePhase(phase, hand)
     const active = score >= DYNAMIC_PHASE_THRESHOLD
+    // print(`[DEBUG] ${gesture.tag} phase=${track.phaseIndex} score=${score.toFixed(2)} active=${active}`)
 
     if (active) {
       if (track.phaseActiveAt === null) track.phaseActiveAt = now
@@ -312,6 +316,7 @@ export class DynamicEngine {
       if (completedIndex === 0) {
         // Record trajectory start at the moment the start gesture is confirmed
         track.trajStartIndex = Math.max(0, track.trajectoryBuffer.length - 1)
+        print(`[DynamicEngine] ${gesture.tag} START recorded at bufferIdx=${track.trajStartIndex}`)
       }
 
       if (isLast) {
@@ -319,6 +324,7 @@ export class DynamicEngine {
         const slice = track.trajectoryBuffer.slice(track.trajStartIndex)
         const threshold = gesture.similarity_threshold ?? 0.7
         const sim = similarity(slice, gesture.trajectory)
+        print(`[DynamicEngine] ${gesture.tag} END — slice=${slice.length}pts sim=${sim.toFixed(3)} threshold=${threshold}`)
         this._resetTrack(track)
         if (sim >= threshold) {
           return { tag: gesture.tag, confidence: sim, hand: side, state: "ended" }
@@ -372,6 +378,7 @@ export class GestureEngine {
   constructor(policy: Policy) {
     this.policyEngine = new PolicyEngine(policy)
     this.dynamicEngine = new DynamicEngine(policy.dynamic_gestures ?? [])
+    print(`[DEBUG] GestureEngine created — dynamic_gestures: ${(policy.dynamic_gestures ?? []).length}`)
   }
 
   /** Replace the active policy and reset all state. */

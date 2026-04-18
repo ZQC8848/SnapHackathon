@@ -88,6 +88,9 @@ export class SnapHandAdapter extends BaseScriptComponent {
   /** Load (or replace) the gesture policy at any time. */
   loadPolicy(policy: Policy): void {
     if (this.engine === null) {
+      print("Before the GestureEngine construction")
+      print(`[loadPolicy] gestures=${policy.gestures.length} dynamic_gestures=${(policy.dynamic_gestures ?? []).length}`)
+      print(`[loadPolicy] policy=${JSON.stringify(policy)}`)
       this.engine = new GestureEngine(policy)
     } else {
       this.engine.loadPolicy(policy)
