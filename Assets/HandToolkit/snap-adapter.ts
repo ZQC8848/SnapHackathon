@@ -1,4 +1,5 @@
-import { SIK } from 'SpectaclesInteractionKit.lspkg/SIK'
+import SIK from 'SpectaclesInteractionKit.lspkg/SIK'
+import TrackedHand from 'SpectaclesInteractionKit.lspkg/Providers/HandInputData/TrackedHand'
 import type { HandFrame, NormalizedHand, Vec3 } from './types'
 import { GestureEngine } from './engine'
 import type { Policy, TriggerOutput } from './types'
@@ -9,13 +10,8 @@ function v(p: vec3): Vec3 {
   return { x: p.x, y: p.y, z: p.z }
 }
 
-/**
- * Converts a SIK TrackedHand to NormalizedHand.
- * Returns undefined when the hand is not tracked so HandFrame omits it.
- * NOTE: SIK names the little finger "pinky"; we map it to "little" here.
- */
 function adaptHand(
-  hand: ReturnType<ReturnType<typeof SIK.HandInputData.getHand>>,
+  hand: TrackedHand,
   side: 'left' | 'right'
 ): NormalizedHand | undefined {
   if (!hand.isTracked()) return undefined
@@ -24,37 +20,32 @@ function adaptHand(
     hand: side,
     trackingConfidence: 1.0,
     joints: {
-      wrist:               v(hand.wrist.position),
+      wrist:           v(hand.wrist.position),
 
-      thumbMetacarpal:     v(hand.thumbMetacarpal.position),
-      thumbProximal:       v(hand.thumbProximal.position),
-      thumbDistal:         v(hand.thumbDistal.position),
-      thumbTip:            v(hand.thumbTip.position),
+      thumbBaseJoint:  v(hand.thumbBaseJoint.position),
+      thumbKnuckle:    v(hand.thumbKnuckle.position),
+      thumbMidJoint:   v(hand.thumbMidJoint.position),
+      thumbTip:        v(hand.thumbTip.position),
 
-      indexMetacarpal:     v(hand.indexMetacarpal.position),
-      indexProximal:       v(hand.indexProximal.position),
-      indexIntermediate:   v(hand.indexIntermediate.position),
-      indexDistal:         v(hand.indexDistal.position),
-      indexTip:            v(hand.indexTip.position),
+      indexKnuckle:    v(hand.indexKnuckle.position),
+      indexMidJoint:   v(hand.indexMidJoint.position),
+      indexUpperJoint: v(hand.indexUpperJoint.position),
+      indexTip:        v(hand.indexTip.position),
 
-      middleMetacarpal:    v(hand.middleMetacarpal.position),
-      middleProximal:      v(hand.middleProximal.position),
-      middleIntermediate:  v(hand.middleIntermediate.position),
-      middleDistal:        v(hand.middleDistal.position),
-      middleTip:           v(hand.middleTip.position),
+      middleKnuckle:    v(hand.middleKnuckle.position),
+      middleMidJoint:   v(hand.middleMidJoint.position),
+      middleUpperJoint: v(hand.middleUpperJoint.position),
+      middleTip:        v(hand.middleTip.position),
 
-      ringMetacarpal:      v(hand.ringMetacarpal.position),
-      ringProximal:        v(hand.ringProximal.position),
-      ringIntermediate:    v(hand.ringIntermediate.position),
-      ringDistal:          v(hand.ringDistal.position),
-      ringTip:             v(hand.ringTip.position),
+      ringKnuckle:    v(hand.ringKnuckle.position),
+      ringMidJoint:   v(hand.ringMidJoint.position),
+      ringUpperJoint: v(hand.ringUpperJoint.position),
+      ringTip:        v(hand.ringTip.position),
 
-      // SIK calls this finger "pinky"; HandToolkit uses "little"
-      littleMetacarpal:    v(hand.pinkyMetacarpal.position),
-      littleProximal:      v(hand.pinkyProximal.position),
-      littleIntermediate:  v(hand.pinkyIntermediate.position),
-      littleDistal:        v(hand.pinkyDistal.position),
-      littleTip:           v(hand.pinkyTip.position),
+      pinkyKnuckle:    v(hand.pinkyKnuckle.position),
+      pinkyMidJoint:   v(hand.pinkyMidJoint.position),
+      pinkyUpperJoint: v(hand.pinkyUpperJoint.position),
+      pinkyTip:        v(hand.pinkyTip.position),
     },
   }
 }
@@ -63,10 +54,7 @@ function adaptHand(
  * Pure function — converts a pair of SIK TrackedHands into a HandFrame.
  * Usable standalone if you need the raw frame without running the engine.
  */
-export function toHandFrame(
-  left:  ReturnType<ReturnType<typeof SIK.HandInputData.getHand>>,
-  right: ReturnType<ReturnType<typeof SIK.HandInputData.getHand>>
-): HandFrame {
+export function toHandFrame(left: TrackedHand, right: TrackedHand): HandFrame {
   return {
     timestamp: Date.now(),
     left:  adaptHand(left,  'left'),
@@ -116,32 +104,30 @@ export class SnapHandAdapter extends BaseScriptComponent {
     this.createEvent('UpdateEvent').bind(() => {
       debugFrameCount++
 
-      // ── Debug: print tracking state every 60 frames (~1 s) ──────────────
-      if (debugFrameCount % 60 === 0) {
-        const lTracked = leftHand.isTracked()
-        const rTracked = rightHand.isTracked()
-        print(`[SnapHandAdapter] left=${lTracked} right=${rTracked}`)
-      }
+      // // ── Debug: print tracking state every 60 frames (~1 s) ──────────────
+      // if (debugFrameCount % 60 === 0) {
+      //   const lTracked = leftHand.isTracked()
+      //   const rTracked = rightHand.isTracked()
+      //   print(`[SnapHandAdapter] left=${lTracked} right=${rTracked}`)
+      // }
 
       const frame = toHandFrame(leftHand, rightHand)
 
-      // ── Debug: print HandFrame wrist positions when a hand is present ───
-      if (debugFrameCount % 60 === 0) {
-        if (frame.left) {
-          const w = frame.left.joints.wrist
-          print(`[SnapHandAdapter] left wrist → (${Math.round(w.x*1000)/1000}, ${Math.round(w.y*1000)/1000}, ${Math.round(w.z*1000)/1000})`)
-        }
-        if (frame.right) {
-          const w = frame.right.joints.wrist
-          print(`[SnapHandAdapter] right wrist → (${Math.round(w.x*1000)/1000}, ${Math.round(w.y*1000)/1000}, ${Math.round(w.z*1000)/1000})`)
-        }
-      }
+      // // ── Debug: print HandFrame wrist positions when a hand is present ───
+      // if (debugFrameCount % 60 === 0) {
+      //   if (frame.left) {
+      //     const w = frame.left.joints.wrist
+      //     print(`[SnapHandAdapter] left wrist → (${Math.round(w.x*1000)/1000}, ${Math.round(w.y*1000)/1000}, ${Math.round(w.z*1000)/1000})`)
+      //   }
+      //   if (frame.right) {
+      //     const w = frame.right.joints.wrist
+      //     print(`[SnapHandAdapter] right wrist → (${Math.round(w.x*1000)/1000}, ${Math.round(w.y*1000)/1000}, ${Math.round(w.z*1000)/1000})`)
+      //   }
+      // }
 
       if (this.engine !== null && this.onTrigger !== null) {
         const output = this.engine.process(frame)
-        if (output.gestures.length > 0) {
-          this.onTrigger(output)
-        }
+        this.onTrigger(output)
       }
     })
   }

@@ -1,4 +1,4 @@
-import type { Vec3 } from "./types.js"
+import type { Vec3 } from "./types"
 
 const RESAMPLE_N = 64
 

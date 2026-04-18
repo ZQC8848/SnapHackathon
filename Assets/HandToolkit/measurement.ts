@@ -1,5 +1,5 @@
-import type { Vec3, NormalizedHand, FingerName, JointName, FingerMetric } from "./types.js"
-import { FINGER_JOINTS } from "./types.js"
+import type { Vec3, NormalizedHand, FingerName, JointName, FingerMetric } from "./types"
+import { FINGER_JOINTS } from "./types"
 
 // ─── Vec3 primitives ──────────────────────────────────────────────────────────
 
@@ -45,11 +45,11 @@ export function angle(a: Vec3, b: Vec3, c: Vec3): number {
 
 // Adjacent proximal joints for spread calculation
 const ADJACENT_PROXIMAL: Record<FingerName, JointName[]> = {
-  thumb:  ["indexProximal"],
-  index:  ["middleProximal"],
-  middle: ["indexProximal", "ringProximal"],
-  ring:   ["littleProximal"],
-  little: ["ringProximal"],
+  thumb:  ["indexKnuckle"],
+  index:  ["middleKnuckle"],
+  middle: ["indexKnuckle", "ringKnuckle"],
+  ring:   ["pinkyKnuckle"],
+  little: ["ringKnuckle"],
 }
 
 // Maximum spread angle (~22.5 degrees) for normalization
@@ -132,8 +132,8 @@ export function palmFacingScore(
   direction: "up" | "down" | "camera" | "away"
 ): number {
   const wrist  = hand.joints["wrist"]
-  const middle = hand.joints["middleMetacarpal"]
-  const index  = hand.joints["indexMetacarpal"]
+  const middle = hand.joints["middleKnuckle"]
+  const index  = hand.joints["indexKnuckle"]
 
   const normal = hand.hand === "right"
     ? normalize(cross(subtract(middle, wrist), subtract(index, wrist)))

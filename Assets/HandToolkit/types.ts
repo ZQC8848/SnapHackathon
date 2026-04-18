@@ -2,11 +2,11 @@ export type Vec3 = { x: number; y: number; z: number }
 
 export type JointName =
   | "wrist"
-  | "thumbMetacarpal" | "thumbProximal" | "thumbDistal" | "thumbTip"
-  | "indexMetacarpal" | "indexProximal" | "indexIntermediate" | "indexDistal" | "indexTip"
-  | "middleMetacarpal" | "middleProximal" | "middleIntermediate" | "middleDistal" | "middleTip"
-  | "ringMetacarpal" | "ringProximal" | "ringIntermediate" | "ringDistal" | "ringTip"
-  | "littleMetacarpal" | "littleProximal" | "littleIntermediate" | "littleDistal" | "littleTip"
+  | "thumbBaseJoint" | "thumbKnuckle" | "thumbMidJoint" | "thumbTip"
+  | "indexKnuckle" | "indexMidJoint" | "indexUpperJoint" | "indexTip"
+  | "middleKnuckle" | "middleMidJoint" | "middleUpperJoint" | "middleTip"
+  | "ringKnuckle" | "ringMidJoint" | "ringUpperJoint" | "ringTip"
+  | "pinkyKnuckle" | "pinkyMidJoint" | "pinkyUpperJoint" | "pinkyTip"
 
 export type FingerName = "thumb" | "index" | "middle" | "ring" | "little"
 
@@ -14,39 +14,39 @@ export type FingerMetric = "fullCurl" | "baseCurl" | "tipCurl" | "pinch" | "spre
 
 export const FINGER_JOINTS = {
   thumb: {
-    metacarpal:   "thumbMetacarpal"  as JointName,
-    proximal:     "thumbProximal"    as JointName,
-    intermediate: "thumbDistal"      as JointName,  // thumb has no intermediate; use distal
-    distal:       "thumbTip"         as JointName,  // use tip for angle
-    tip:          "thumbTip"         as JointName,
+    metacarpal:   "wrist"          as JointName,  // no metacarpal in SIK; wrist used for baseCurl
+    proximal:     "thumbBaseJoint" as JointName,
+    intermediate: "thumbKnuckle"   as JointName,
+    distal:       "thumbMidJoint"  as JointName,
+    tip:          "thumbTip"       as JointName,
   },
   index: {
-    metacarpal:   "indexMetacarpal"    as JointName,
-    proximal:     "indexProximal"      as JointName,
-    intermediate: "indexIntermediate"  as JointName,
-    distal:       "indexDistal"        as JointName,
-    tip:          "indexTip"           as JointName,
+    metacarpal:   "wrist"           as JointName,
+    proximal:     "indexKnuckle"    as JointName,
+    intermediate: "indexMidJoint"   as JointName,
+    distal:       "indexUpperJoint" as JointName,
+    tip:          "indexTip"        as JointName,
   },
   middle: {
-    metacarpal:   "middleMetacarpal"    as JointName,
-    proximal:     "middleProximal"      as JointName,
-    intermediate: "middleIntermediate"  as JointName,
-    distal:       "middleDistal"        as JointName,
-    tip:          "middleTip"           as JointName,
+    metacarpal:   "wrist"            as JointName,
+    proximal:     "middleKnuckle"    as JointName,
+    intermediate: "middleMidJoint"   as JointName,
+    distal:       "middleUpperJoint" as JointName,
+    tip:          "middleTip"        as JointName,
   },
   ring: {
-    metacarpal:   "ringMetacarpal"    as JointName,
-    proximal:     "ringProximal"      as JointName,
-    intermediate: "ringIntermediate"  as JointName,
-    distal:       "ringDistal"        as JointName,
-    tip:          "ringTip"           as JointName,
+    metacarpal:   "wrist"          as JointName,
+    proximal:     "ringKnuckle"    as JointName,
+    intermediate: "ringMidJoint"   as JointName,
+    distal:       "ringUpperJoint" as JointName,
+    tip:          "ringTip"        as JointName,
   },
   little: {
-    metacarpal:   "littleMetacarpal"    as JointName,
-    proximal:     "littleProximal"      as JointName,
-    intermediate: "littleIntermediate"  as JointName,
-    distal:       "littleDistal"        as JointName,
-    tip:          "littleTip"           as JointName,
+    metacarpal:   "wrist"           as JointName,
+    proximal:     "pinkyKnuckle"    as JointName,
+    intermediate: "pinkyMidJoint"   as JointName,
+    distal:       "pinkyUpperJoint" as JointName,
+    tip:          "pinkyTip"        as JointName,
   },
 } satisfies Record<FingerName, { metacarpal: JointName; proximal: JointName; intermediate: JointName; distal: JointName; tip: JointName }>
 

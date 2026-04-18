@@ -9,8 +9,8 @@ import type {
   DynamicGesture,
   Phase,
 } from "./types.js"
-import { evaluateGesture, evaluateCondition } from "./evaluator.js"
-import { similarity } from "./trajectory.js"
+import { evaluateGesture, evaluateCondition } from "./evaluator"
+import { similarity } from "./trajectory"
 
 // ---------------------------------------------------------------------------
 // Internal per-gesture-per-hand temporal state

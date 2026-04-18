@@ -1,5 +1,5 @@
-import type { Condition, GestureDefinition, NormalizedHand } from "./types.js"
-import { distance, getFingerMetric, palmFacingScore } from "./measurement.js"
+import type { Condition, GestureDefinition, NormalizedHand } from "./types"
+import { distance, getFingerMetric, palmFacingScore } from "./measurement"
 
 // ─── Tolerance band scoring ───────────────────────────────────────────────────
 //
