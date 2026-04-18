@@ -1,8 +1,9 @@
 @component
 export class SendMsgToServer extends BaseScriptComponent {
     @input
-    @hint("Remote Service Module asset used to create WebSocket")
-    remoteServiceModule!: RemoteServiceModule
+    @allowUndefined
+    @hint("Internet Module asset used to create WebSocket")
+    internetModule!: InternetModule
 
     @input
     @hint("WebSocket server URL, e.g. ws://192.168.1.42:3000/ws or wss://.../ws")
@@ -28,6 +29,11 @@ export class SendMsgToServer extends BaseScriptComponent {
     @hint("Enable logs in Lens Studio logger")
     enableLogging: boolean = true
 
+    @input
+    @allowUndefined
+    @hint("Optional Text component to display the latest message")
+    messageText: Text | undefined
+
     // Active WebSocket connection. Null means disconnected.
     private socket: WebSocket | null = null
     // Outgoing messages buffered while socket is not OPEN.
@@ -41,8 +47,8 @@ export class SendMsgToServer extends BaseScriptComponent {
 
     onAwake() {
         // Guard against missing inspector input.
-        if (!this.remoteServiceModule) {
-            this.log("Missing remoteServiceModule input")
+        if (!this.internetModule) {
+            this.log("Missing internetModule input")
             return
         }
 
@@ -85,7 +91,7 @@ export class SendMsgToServer extends BaseScriptComponent {
     }
 
     private connect() {
-        if (!this.remoteServiceModule) {
+        if (!this.internetModule) {
             return
         }
 
@@ -107,7 +113,7 @@ export class SendMsgToServer extends BaseScriptComponent {
         this.log("Connecting: " + url)
 
         try {
-            this.socket = this.remoteServiceModule.createWebSocket(url)
+            this.socket = this.internetModule.createWebSocket(url)
         } catch (e) {
             this.isConnecting = false
             this.log("createWebSocket failed: " + e)
@@ -166,6 +172,7 @@ export class SendMsgToServer extends BaseScriptComponent {
             try {
                 this.socket.send(text)
                 this.log("Sent: " + text)
+                this.updateMessageText("Sent: " + text)
             } catch (e) {
                 this.log("Send failed, queued: " + e)
                 this.enqueue(text)
@@ -178,6 +185,7 @@ export class SendMsgToServer extends BaseScriptComponent {
 
     private enqueue(text: string) {
         this.pending.push(text)
+        this.updateMessageText("Queued: " + text)
 
         // Keep queue bounded so offline periods do not grow memory indefinitely.
         const maxCount = Math.max(1, Math.floor(this.maxPendingMessages))
@@ -192,10 +200,16 @@ export class SendMsgToServer extends BaseScriptComponent {
         }
 
         // Preserve original order for buffered messages.
+        let lastFlushed = ""
         for (let i = 0; i < this.pending.length; i++) {
             this.socket.send(this.pending[i])
+            lastFlushed = this.pending[i]
         }
         this.pending = []
+
+        if (lastFlushed.length > 0) {
+            this.updateMessageText("Sent: " + lastFlushed)
+        }
     }
 
     private getCurrentPstText(): string {
@@ -221,6 +235,12 @@ export class SendMsgToServer extends BaseScriptComponent {
     private log(message: string) {
         if (this.enableLogging) {
             print("[SendMsgToServer] " + message)
+        }
+    }
+
+    private updateMessageText(message: string) {
+        if (this.messageText) {
+            this.messageText.text = message
         }
     }
 }
