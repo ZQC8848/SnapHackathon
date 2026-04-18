@@ -58,6 +58,10 @@ const MAX_SPREAD_RAD = Math.PI / 8
 // Reference distance for pinch normalization (fully open hand ≈ 10cm)
 const PINCH_MAX_DISTANCE = 0.1
 
+// WARNING: device-specific workaround — raw curl range is ~0-0.5 on Spectacles,
+// scale factor remaps to 0-1. May need adjustment on other devices or SIK versions.
+const CURL_SCALE = 2.0
+
 // ─── Public measurement functions ────────────────────────────────────────────
 
 /**
@@ -67,7 +71,7 @@ const PINCH_MAX_DISTANCE = 0.1
 export function fingerCurl(hand: NormalizedHand, finger: FingerName): number {
   const j = FINGER_JOINTS[finger]
   const a = angle(hand.joints[j.proximal], hand.joints[j.intermediate], hand.joints[j.distal])
-  return Math.min(1, Math.max(0, a / Math.PI))
+  return Math.min(1, Math.max(0, (1 - a / Math.PI) * CURL_SCALE))
 }
 
 /**
@@ -77,7 +81,7 @@ export function fingerCurl(hand: NormalizedHand, finger: FingerName): number {
 export function fingerBaseCurl(hand: NormalizedHand, finger: FingerName): number {
   const j = FINGER_JOINTS[finger]
   const a = angle(hand.joints[j.metacarpal], hand.joints[j.proximal], hand.joints[j.intermediate])
-  return Math.min(1, Math.max(0, a / Math.PI))
+  return Math.min(1, Math.max(0, (1 - a / Math.PI) * CURL_SCALE))
 }
 
 /**
@@ -89,7 +93,7 @@ export function fingerTipCurl(hand: NormalizedHand, finger: FingerName): number 
   if (finger === "thumb") return fingerCurl(hand, finger)
   const j = FINGER_JOINTS[finger]
   const a = angle(hand.joints[j.intermediate], hand.joints[j.distal], hand.joints[j.tip])
-  return Math.min(1, Math.max(0, a / Math.PI))
+  return Math.min(1, Math.max(0, (1 - a / Math.PI) * CURL_SCALE))
 }
 
 /**

@@ -1,4 +1,5 @@
 import { SnapHandAdapter } from './snap-adapter'
+import { HandDebugPanel } from './HandDebugPanel'
 import type { Policy } from './types'
 
 const FIST_POLICY: Policy = {
@@ -8,10 +9,10 @@ const FIST_POLICY: Policy = {
       tag: 'fist',
       hand: 'any',
       conditions: [
-        { type: 'finger_shape', finger: 'index',  metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.3 },
-        { type: 'finger_shape', finger: 'middle', metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.3 },
-        { type: 'finger_shape', finger: 'ring',   metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.3 },
-        { type: 'finger_shape', finger: 'little', metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.3 },
+        { type: 'finger_shape', finger: 'index',  metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
+        { type: 'finger_shape', finger: 'middle', metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
+        { type: 'finger_shape', finger: 'ring',   metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
+        { type: 'finger_shape', finger: 'little', metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
       ],
     },
   ],
@@ -21,6 +22,10 @@ const FIST_POLICY: Policy = {
 export class GestureTest extends BaseScriptComponent {
   @input
   adapter: SnapHandAdapter
+
+  @input
+  @allowUndefined
+  panel: HandDebugPanel
 
   onAwake() {
     this.createEvent('OnStartEvent').bind(() => this.onStart())
@@ -34,11 +39,11 @@ export class GestureTest extends BaseScriptComponent {
 
     this.adapter.loadPolicy(FIST_POLICY)
     this.adapter.onTrigger = (output) => {
+      if (this.panel) {
+        this.panel.updateGestures(output)
+      }
       for (const g of output.gestures) {
         print(`[GestureTest] ${g.tag} | ${g.hand} | ${g.state} | ${Math.round(g.confidence * 100)}%`)
-      }
-      if (output.gestures.length === 0) {
-        print('[GestureTest] no gesture detected')
       }
     }
 
