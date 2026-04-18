@@ -305,9 +305,24 @@ export class DynamicEngine {
       track.isRecording = false
       const slice = track.trajectoryBuffer.slice(track.recordStartIndex)
       const threshold = gesture.similarity_threshold ?? 0.7
+
       const sim = similarity(slice, gesture.trajectory)
-      print(`[DynamicEngine] ${gesture.tag} END — slice=${slice.length}pts sim=${sim.toFixed(3)} threshold=${threshold}`)
-      if (sim >= threshold) {
+
+      // Direction check: cosine similarity between template and actual start→end vectors
+      const tFirst = gesture.trajectory[0]!
+      const tLast  = gesture.trajectory[gesture.trajectory.length - 1]!
+      const aFirst = slice[0]!
+      const aLast  = slice[slice.length - 1]!
+      const tDir = { x: tLast.x - tFirst.x, y: tLast.y - tFirst.y, z: tLast.z - tFirst.z }
+      const aDir = { x: aLast.x - aFirst.x, y: aLast.y - aFirst.y, z: aLast.z - aFirst.z }
+      const dot = tDir.x * aDir.x + tDir.y * aDir.y + tDir.z * aDir.z
+      const tMag = Math.sqrt(tDir.x ** 2 + tDir.y ** 2 + tDir.z ** 2)
+      const aMag = Math.sqrt(aDir.x ** 2 + aDir.y ** 2 + aDir.z ** 2)
+      const cosine = (tMag > 0 && aMag > 0) ? dot / (tMag * aMag) : 0
+      const dirMatch = cosine > 0.7
+
+      print(`[DynamicEngine] ${gesture.tag} END — slice=${slice.length}pts sim=${sim.toFixed(3)} dir=${cosine.toFixed(2)} threshold=${threshold}`)
+      if (sim >= threshold && dirMatch) {
         return { tag: gesture.tag, confidence: sim, hand: side, state: "ended" }
       }
       return null
