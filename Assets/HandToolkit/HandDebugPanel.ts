@@ -49,6 +49,7 @@ function handSection(hand: NormalizedHand): string {
 export class HandDebugPanel extends BaseScriptComponent {
   /** Optional — assign a Text component to render into the scene. Falls back to print() if not set. */
   @input('Component.Text')
+  @allowUndefined
   debugText: Text | null = null
 
   /** How many frames to skip between refreshes (lower = more CPU). */

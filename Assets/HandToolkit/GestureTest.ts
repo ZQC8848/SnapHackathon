@@ -16,6 +16,51 @@ const FIST_POLICY: Policy = {
       ],
     },
   ],
+  dynamic_gestures: [
+    {
+      tag: 'swipe_diagonal',
+      hand: 'any',
+      // Phase 0: fist to start recording, Phase 1: open hand to end
+      // Make a fist, swipe top-right to bottom-left, then open hand
+      conditions: [
+        { type: 'finger_shape', finger: 'index',  metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
+        { type: 'finger_shape', finger: 'middle', metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
+      ],
+      // Template: straight line from top-right (+X+Y) to bottom-left (-X-Y)
+      trajectory: [
+        { x:  1.0, y:  1.0, z: 0 },
+        { x:  0.8, y:  0.8, z: 0 },
+        { x:  0.6, y:  0.6, z: 0 },
+        { x:  0.4, y:  0.4, z: 0 },
+        { x:  0.2, y:  0.2, z: 0 },
+        { x:  0.0, y:  0.0, z: 0 },
+        { x: -0.2, y: -0.2, z: 0 },
+        { x: -0.4, y: -0.4, z: 0 },
+        { x: -0.6, y: -0.6, z: 0 },
+        { x: -0.8, y: -0.8, z: 0 },
+        { x: -1.0, y: -1.0, z: 0 },
+      ],
+      similarity_threshold: 0.85,
+    },
+    {
+      tag: 'push_forward',
+      hand: 'any',
+      conditions: [
+        { type: 'finger_shape', finger: 'index',  metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
+        { type: 'finger_shape', finger: 'middle', metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
+      ],
+      // Template: straight line from back (+Z) to front (-Z)
+      trajectory: [
+        { x: 0, y: 0, z:  1.0 },
+        { x: 0, y: 0, z:  0.6 },
+        { x: 0, y: 0, z:  0.2 },
+        { x: 0, y: 0, z: -0.2 },
+        { x: 0, y: 0, z: -0.6 },
+        { x: 0, y: 0, z: -1.0 },
+      ],
+      similarity_threshold: 0.85,
+    },
+  ],
 }
 
 @component
@@ -42,11 +87,11 @@ export class GestureTest extends BaseScriptComponent {
       if (this.panel) {
         this.panel.updateGestures(output)
       }
-      for (const g of output.gestures) {
-        print(`[GestureTest] ${g.tag} | ${g.hand} | ${g.state} | ${Math.round(g.confidence * 100)}%`)
-      }
+      // for (const g of output.gestures) {
+      //   print(`[GestureTest] ${g.tag} | ${g.hand} | ${g.state} | ${Math.round(g.confidence * 100)}%`)
+      // }
     }
 
-    print('[GestureTest] Policy loaded, watching for fist gesture...')
+    // print('[GestureTest] Policy loaded, watching for fist gesture...')
   }
 }

@@ -106,16 +106,10 @@ export type Policy = {
 
 // ─── Dynamic gesture types ────────────────────────────────────────────────────
 
-export type Phase = {
-  conditions: Condition[]
-  min_ms?: number
-  timeout_ms?: number
-}
-
 export type DynamicGesture = {
   tag: string
   hand: "left" | "right" | "any" | "both"
-  phases: Phase[]
+  conditions: Condition[]
   trajectory: Vec3[]
   similarity_threshold?: number
 }
