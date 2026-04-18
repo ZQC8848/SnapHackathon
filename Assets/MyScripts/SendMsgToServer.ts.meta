@@ -27,7 +27,9 @@
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
     autoReconnect: false
+    enableHandChannel: false
     enableLogging: false
+    handServerUrl: false
     internetModule: false
     maxPendingMessages: false
     messageText: false
@@ -45,6 +47,8 @@
   DefaultScriptInputs:
     - internetModule: !<reference.InternetModule> 00000000-0000-0000-0000-000000000000
       serverUrl: "ws://127.0.0.1:3000/ws"
+      handServerUrl: "wss://paralysis-coach-manifesto.ngrok-free.dev/ws/hand"
+      enableHandChannel: true
       sendIntervalSec: !<float> 1.000000
       autoReconnect: true
       reconnectDelaySec: 1.500000
@@ -57,6 +61,8 @@
   InputLines:
     - '// @input Asset.InternetModule internetModule {"hint":"Internet Module asset used to create WebSocket"}'
     - '// @input string serverUrl = "wss://paralysis-coach-manifesto.ngrok-free.dev/ws" {"hint":"WebSocket server URL, e.g. ws://192.168.1.42:3000/ws or wss://.../ws"}'
+    - '// @input string handServerUrl = "wss://paralysis-coach-manifesto.ngrok-free.dev/ws/hand" {"hint":"Dedicated hand-data WebSocket endpoint"}'
+    - '// @input bool enableHandChannel = true {"hint":"Enable dedicated hand-data channel"}'
     - '// @input float sendIntervalSec = 1 {"hint":"Seconds between sends"}'
     - '// @input bool autoReconnect = true {"hint":"Enable automatic reconnect on close/error"}'
     - '// @input float reconnectDelaySec = 1.5 {"hint":"Seconds to wait before reconnect"}'

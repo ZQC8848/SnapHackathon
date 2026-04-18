@@ -10,6 +10,14 @@ export class SendMsgToServer extends BaseScriptComponent {
     serverUrl: string = "wss://paralysis-coach-manifesto.ngrok-free.dev/ws"
 
     @input
+    @hint("Dedicated hand-data WebSocket endpoint")
+    handServerUrl: string = "wss://paralysis-coach-manifesto.ngrok-free.dev/ws/hand"
+
+    @input
+    @hint("Enable dedicated hand-data channel")
+    enableHandChannel: boolean = true
+
+    @input
     @hint("Seconds between sends")
     sendIntervalSec: number = 1.0
 
@@ -40,10 +48,16 @@ export class SendMsgToServer extends BaseScriptComponent {
     private pending: string[] = []
     // Reused delayed event for reconnect attempts.
     private reconnectEvent: DelayedCallbackEvent | null = null
+
+    private handSocket: WebSocket | null = null
+    private handPending: string[] = []
+    private handReconnectEvent: DelayedCallbackEvent | null = null
+
     private updateEvent: UpdateEvent | null = null
     // Next send timestamp (seconds) to enforce fixed send interval.
     private nextSendAtSec: number = 0
     private isConnecting: boolean = false
+    private isHandConnecting: boolean = false
 
     onAwake() {
         // Guard against missing inspector input.
@@ -54,6 +68,9 @@ export class SendMsgToServer extends BaseScriptComponent {
 
         // Start connection immediately on script awake.
         this.connect()
+        if (this.enableHandChannel) {
+            this.connectHandChannel()
+        }
 
         // Drive periodic sending using frame updates + time gate.
         this.updateEvent = this.createEvent("UpdateEvent")
@@ -72,6 +89,15 @@ export class SendMsgToServer extends BaseScriptComponent {
         if (this.socket) {
             this.socket.close()
             this.socket = null
+        }
+
+        if (this.handReconnectEvent) {
+            this.handReconnectEvent.enabled = false
+        }
+
+        if (this.handSocket) {
+            this.handSocket.close()
+            this.handSocket = null
         }
     }
 
@@ -166,6 +192,72 @@ export class SendMsgToServer extends BaseScriptComponent {
         this.reconnectEvent.reset(Math.max(0.1, this.reconnectDelaySec))
     }
 
+    private connectHandChannel() {
+        if (!this.enableHandChannel || !this.internetModule) {
+            return
+        }
+
+        const url = (this.handServerUrl || "").trim()
+        if (url.length === 0) {
+            this.log("handServerUrl is empty")
+            return
+        }
+
+        if (this.isHandConnecting) {
+            return
+        }
+
+        if (this.handSocket && (this.handSocket.readyState === 0 || this.handSocket.readyState === 1)) {
+            return
+        }
+
+        this.isHandConnecting = true
+        this.log("Connecting hand channel: " + url)
+
+        try {
+            this.handSocket = this.internetModule.createWebSocket(url)
+        } catch (e) {
+            this.isHandConnecting = false
+            this.log("createWebSocket(hand) failed: " + e)
+            this.scheduleHandReconnect()
+            return
+        }
+
+        this.handSocket.onopen = () => {
+            this.isHandConnecting = false
+            this.log("Hand channel opened")
+            this.flushHandPending()
+        }
+
+        this.handSocket.onerror = () => {
+            this.isHandConnecting = false
+            this.log("Hand channel error")
+            this.scheduleHandReconnect()
+        }
+
+        this.handSocket.onclose = () => {
+            this.isHandConnecting = false
+            this.log("Hand channel closed")
+            this.handSocket = null
+            this.scheduleHandReconnect()
+        }
+    }
+
+    private scheduleHandReconnect() {
+        if (!this.autoReconnect || !this.enableHandChannel) {
+            return
+        }
+
+        if (!this.handReconnectEvent) {
+            this.handReconnectEvent = this.createEvent("DelayedCallbackEvent")
+            this.handReconnectEvent.bind(() => {
+                this.connectHandChannel()
+            })
+        }
+
+        this.handReconnectEvent.reset(Math.max(0.1, this.reconnectDelaySec))
+    }
+
     private sendText(text: string) {
         // Send immediately when OPEN, otherwise buffer.
         if (this.socket && this.socket.readyState === 1) {
@@ -192,6 +284,53 @@ export class SendMsgToServer extends BaseScriptComponent {
         while (this.pending.length > maxCount) {
             this.pending.shift()
         }
+    }
+
+    private sendToHandChannel(text: string): "sent" | "queued" | "blocked" {
+        if (!this.enableHandChannel) {
+            this.log("Hand channel disabled, recording payload blocked")
+            this.updateMessageText("Hand channel disabled")
+            return "blocked"
+        }
+
+        if (this.handSocket && this.handSocket.readyState === 1) {
+            try {
+                this.handSocket.send(text)
+                this.log("Hand sent: " + text)
+                this.updateMessageText("Hand sent")
+                return "sent"
+            } catch (e) {
+                this.log("Hand send failed, queued: " + e)
+                this.enqueueHand(text)
+                return "queued"
+            }
+        }
+
+        this.enqueueHand(text)
+        this.connectHandChannel()
+        return "queued"
+    }
+
+    private enqueueHand(text: string) {
+        this.handPending.push(text)
+        this.updateMessageText("Hand queued")
+
+        const maxCount = Math.max(1, Math.floor(this.maxPendingMessages))
+        while (this.handPending.length > maxCount) {
+            this.handPending.shift()
+        }
+    }
+
+    private flushHandPending() {
+        if (!this.handSocket || this.handSocket.readyState !== 1) {
+            return
+        }
+
+        for (let i = 0; i < this.handPending.length; i++) {
+            this.handSocket.send(this.handPending[i])
+        }
+        this.handPending = []
+        this.updateMessageText("Hand sent")
     }
 
     private flushPending() {
@@ -242,5 +381,14 @@ export class SendMsgToServer extends BaseScriptComponent {
         if (this.messageText) {
             this.messageText.text = message
         }
+    }
+
+    public sendRecordingGesturetoServer(gesture: string): "sent" | "queued" | "blocked" {
+        if (!gesture || gesture.length === 0) {
+            this.log("sendRecordingGesturetoServer skipped: empty payload")
+            return "blocked"
+        }
+
+        return this.sendToHandChannel(gesture)
     }
 }
