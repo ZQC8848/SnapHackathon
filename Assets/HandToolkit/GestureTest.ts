@@ -1,5 +1,6 @@
 import { SnapHandAdapter } from './snap-adapter'
 import { HandDebugPanel } from './HandDebugPanel'
+import { SendMsgToServer } from '../MyScripts/SendMsgToServer'
 import type { Policy } from './types'
 
 const FIST_POLICY: Policy = {
@@ -72,6 +73,10 @@ export class GestureTest extends BaseScriptComponent {
   @allowUndefined
   panel: HandDebugPanel
 
+  @input
+  @allowUndefined
+  server: SendMsgToServer
+
   onAwake() {
     this.createEvent('OnStartEvent').bind(() => this.onStart())
   }
@@ -87,9 +92,14 @@ export class GestureTest extends BaseScriptComponent {
       if (this.panel) {
         this.panel.updateGestures(output)
       }
-      // for (const g of output.gestures) {
-      //   print(`[GestureTest] ${g.tag} | ${g.hand} | ${g.state} | ${Math.round(g.confidence * 100)}%`)
-      // }
+      for (const g of output.gestures) {
+        if (g.state === 'ended') {
+          print(`[GestureTest] ${g.tag} | ${g.hand} | ${Math.round(g.confidence * 100)}%`)
+          if (this.server) {
+            this.server.sendGesture(g.tag)
+          }
+        }
+      }
     }
 
     // print('[GestureTest] Policy loaded, watching for fist gesture...')
