@@ -1879,9 +1879,9 @@
     Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
     HasSegmentScaleCompensation: false
   Children:
-    - !<own> e889e17f-4a35-4916-b9be-faf17fc9d1fb
     - !<own> 32ae0373-8b47-49d1-be5d-dabef5a16280
     - !<own> 2ef8b492-4e47-45fa-8895-ceadb4b90770
+    - !<own> b9cfa54a-704b-4e50-a5e2-47e53364a5ef
   Components:
     - !<own> ffb9e690-daa0-4979-8e3e-9502b8a9b6bf
 - !<RenderMeshVisual/08d728e5-871c-48e3-a054-7e7388b6110b>
@@ -4515,7 +4515,7 @@
   PrefabRemaps:
     []
   Name: Guide_ReadAndDisable
-  Enabled: true
+  Enabled: false
   Layers: 1
   LocalTransform: !<TransformEntity>
     Position: {x: 0.000000, y: 0.000000, z: -70.000000}
@@ -10586,7 +10586,7 @@
   Enabled: true
   Layers: 1
   LocalTransform: !<TransformEntity>
-    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Position: {x: 0.000000, y: 0.000000, z: -121.567101}
     Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
     Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
     HasSegmentScaleCompensation: false
@@ -18543,6 +18543,8 @@
   Enabled: true
   ScriptAsset: !<reference> 57b0f3fd-34f0-4e52-83d6-6449f58c0847
   ScriptInputsDefault:
+    handServerUrl: true
+    enableHandChannel: true
     sendIntervalSec: true
     autoReconnect: true
     reconnectDelaySec: true
@@ -18552,14 +18554,16 @@
     {}
   ScriptInputs:
     "":
-      internetModule: !<reference.InternetModule> ab22e2fd-8d2b-4244-b71a-2f92128a243d
+      internetModule: !<reference.InternetModule> 0da43ba2-471a-4a48-a0db-f8ad075d2878
       serverUrl: "wss://paralysis-coach-manifesto.ngrok-free.dev/ws"
+      handServerUrl: "wss://paralysis-coach-manifesto.ngrok-free.dev/ws/hand"
+      enableHandChannel: true
       sendIntervalSec: !<float> 1.000000
       autoReconnect: true
       reconnectDelaySec: 1.500000
       maxPendingMessages: !<float> 32.000000
       enableLogging: true
-      messageText: !<reference.Text> 2b509641-9fa8-4cc7-9a18-5375952eaae7
+      messageText: !<reference.Text> d34bd714-1981-443b-b3d5-ae66e8f54ee0
   ScriptTypes:
     "":
       {}
@@ -39591,6 +39595,21 @@
     []
   Components:
     - !<own> 50f77f32-02fc-4b31-a3ff-00d4558db1dd
+- !<SceneObject/b9cfa54a-704b-4e50-a5e2-47e53364a5ef>
+  PrefabRemaps:
+    []
+  Name: Object 1
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: -64.339371}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> d34bd714-1981-443b-b3d5-ae66e8f54ee0
 - !<SceneObject/b9f463c4-780a-4cb2-884d-fc1f0dd5321f>
   PrefabRemaps:
     []
@@ -40030,6 +40049,8 @@
   ScriptInputs:
     "":
       adapter: !<MappingBased.AssignableType> c4a6c3e2-fae5-4d67-b37c-187fa3b2f579
+      panel: !<MappingBased.AssignableType_1> d5013ee0-f1e7-4895-9151-f6810d61120c
+      server: !<MappingBased.AssignableType_2> 4d578d99-b372-4e87-9777-388bdf407bde
   ScriptTypes:
     "":
       {}
@@ -41656,42 +41677,6 @@
     - !<reference> ded94381-e3ce-43ac-89bf-c821ea0e85bc
   Autoplay: true
   Version: FBX
-- !<Text3D/c293a6c0-2e11-44f6-9b63-24e84ca817bf>
-  PrefabRemaps:
-    []
-  Name: Text3D
-  Enabled: true
-  RenderOrder: 0
-  StretchMode: Stretch
-  VerticalAlignment: Center
-  HorizontalAlignment: Center
-  MeshShadowMode: None
-  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
-  ShadowDensity: 1.000000
-  Materials:
-    - !<reference> 46f9da4a-b30c-4e7d-bef6-2a200c78060f
-  Text: 3D Text
-  Editable: false
-  ShowEditingPreview: true
-  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
-  SizeToFit: false
-  FontSize: 48
-  ExtrusionDepth: 0.400000
-  ExtrudeDirection: Both
-  Font: !<reference> 00000000-0000-0000-0000-000000000000
-  LayoutRect:
-    left: -7.500000
-    bottom: -2.250000
-    right: 7.500000
-    top: 2.250000
-  OverflowVertical: Overflow
-  OverflowHorizontal: Overflow
-  AdvancedLayout: !<TextAdvancedLayout>
-    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
-    LetterSpacing: 0.000000
-    LineSpacing: 1.000000
-    CapitalizationOverride: None
-  EnableBatching: false
 - !<ScriptComponent/c29d1579-7775-4b58-8964-da2b1136bee9>
   PrefabRemaps:
     []
@@ -44953,6 +44938,87 @@
   Components:
     - !<own> 854b1944-bc91-4373-b1e3-da74ee0521cf
     - !<own> 0a8715e6-6878-4ad3-a1ad-e50aded3c1db
+- !<Text/d34bd714-1981-443b-b3d5-ae66e8f54ee0>
+  PrefabRemaps:
+    []
+  Name: Text
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Text: Text
+  Editable: false
+  ShowEditingPreview: true
+  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
+  SizeToFit: false
+  FontSize: 48
+  Font: !<reference> 00000000-0000-0000-0000-000000000000
+  LayoutRect:
+    left: -7.500000
+    bottom: -2.250000
+    right: 7.500000
+    top: 2.250000
+  OverflowVertical: Overflow
+  OverflowHorizontal: Overflow
+  Fill: !<TextFill>
+    Mode: Solid
+    Color: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+    Texture: !<reference> 00000000-0000-0000-0000-000000000000
+    ColorTint: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+    TileCount: 5.000000
+    TileZone: Rect
+    TextureStretch: FitWidth
+  BlendMode: PremultipliedAlpha
+  Outline: !<OutlineSettings>
+    Enabled: false
+    Fill: !<TextFill>
+      Mode: Solid
+      Color: {x: 0.000000, y: 0.000000, z: 0.000000, w: 1.000000}
+      Texture: !<reference> 00000000-0000-0000-0000-000000000000
+      ColorTint: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+      TileCount: 5.000000
+      TileZone: Rect
+      TextureStretch: FitWidth
+    Size: 0.250000
+  Dropshadow: !<DropshadowSettings>
+    Enabled: false
+    Fill: !<TextFill>
+      Mode: Solid
+      Color: {x: 0.000000, y: 0.000000, z: 0.000000, w: 1.000000}
+      Texture: !<reference> 00000000-0000-0000-0000-000000000000
+      ColorTint: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+      TileCount: 5.000000
+      TileZone: Rect
+      TextureStretch: FitWidth
+    OffsetX: 0.250000
+    OffsetY: 0.250000
+  Background: !<BackgroundSettings>
+    Enabled: true
+    Fill: !<TextFill>
+      Mode: Solid
+      Color: {x: 0.000000, y: 0.000000, z: 0.000000, w: 1.000000}
+      Texture: !<reference> 00000000-0000-0000-0000-000000000000
+      ColorTint: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+      TileCount: 5.000000
+      TileZone: Rect
+      TextureStretch: FitWidth
+    Margins:
+      left: 0.000000
+      bottom: 0.000000
+      right: 0.000000
+      top: 0.000000
+    CornerRadius: 0.000000
+  AdvancedLayout: !<TextAdvancedLayout>
+    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+    LetterSpacing: 0.000000
+    LineSpacing: 1.000000
+    CapitalizationOverride: None
+  DepthTest: false
+  TwoSided: false
 - !<SceneObject/d37963d7-e66b-4d0f-854e-cf87dcb9b868>
   PrefabRemaps:
     []
@@ -45253,13 +45319,12 @@
   Enabled: true
   ScriptAsset: !<reference> ac31f15f-6795-408a-95d3-b4cae245b6c3
   ScriptInputsDefault:
-    debugText: true
     updateInterval: true
   ScriptTypesDefault:
     {}
   ScriptInputs:
     "":
-      debugText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      debugText: !<reference.Text> 5158cadf-3958-4524-a14e-d438580303c8
       updateInterval: !<float> 4.000000
   ScriptTypes:
     "":
@@ -49280,21 +49345,6 @@
   ScriptTypes:
     "":
       {}
-- !<SceneObject/e889e17f-4a35-4916-b9be-faf17fc9d1fb>
-  PrefabRemaps:
-    []
-  Name: Object 0
-  Enabled: true
-  Layers: 1
-  LocalTransform: !<TransformEntity>
-    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
-    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
-    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
-    HasSegmentScaleCompensation: false
-  Children:
-    []
-  Components:
-    - !<own> c293a6c0-2e11-44f6-9b63-24e84ca817bf
 - !<Text/e89bd5d9-80ed-4424-a8f2-1ed1a0c66244>
   PrefabRemaps:
     []

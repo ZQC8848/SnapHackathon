@@ -54,8 +54,6 @@ export class SendMsgToServer extends BaseScriptComponent {
     private handReconnectEvent: DelayedCallbackEvent | null = null
 
     private updateEvent: UpdateEvent | null = null
-    // Next send timestamp (seconds) to enforce fixed send interval.
-    private nextSendAtSec: number = 0
     private isConnecting: boolean = false
     private isHandConnecting: boolean = false
 
@@ -101,19 +99,13 @@ export class SendMsgToServer extends BaseScriptComponent {
         }
     }
 
+    /** Send a gesture tag to the main server channel immediately. */
+    sendGesture(tag: string): void {
+        this.sendText(tag)
+    }
+
     private onUpdate() {
-        if (this.sendIntervalSec <= 0) {
-            return
-        }
-
-        const nowSec = getTime()
-        if (nowSec < this.nextSendAtSec) {
-            return
-        }
-
-        // Send one message every sendIntervalSec.
-        this.nextSendAtSec = nowSec + this.sendIntervalSec
-        this.sendText(this.getCurrentPstText())
+        // reserved
     }
 
     private connect() {
@@ -351,25 +343,6 @@ export class SendMsgToServer extends BaseScriptComponent {
         }
     }
 
-    private getCurrentPstText(): string {
-        // PST is UTC-8 (fixed offset, no DST adjustment).
-        const pstOffsetMs = 8 * 60 * 60 * 1000
-        const nowUtcMs = new Date().getTime()
-        const pstDate = new Date(nowUtcMs - pstOffsetMs)
-
-        const year = pstDate.getUTCFullYear()
-        const month = this.pad2(pstDate.getUTCMonth() + 1)
-        const day = this.pad2(pstDate.getUTCDate())
-        const hour = this.pad2(pstDate.getUTCHours())
-        const minute = this.pad2(pstDate.getUTCMinutes())
-        const second = this.pad2(pstDate.getUTCSeconds())
-
-        return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second + " PST"
-    }
-
-    private pad2(value: number): string {
-        return value < 10 ? "0" + value : "" + value
-    }
 
     private log(message: string) {
         if (this.enableLogging) {

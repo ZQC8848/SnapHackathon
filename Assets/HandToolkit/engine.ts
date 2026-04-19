@@ -196,7 +196,8 @@ export class PolicyEngine {
 
 const TRAJECTORY_MAX_LEN = 600   // ~10 s at 60 fps
 const DYNAMIC_ENTER_THRESHOLD = 0.7  // score must reach this to start recording
-const DYNAMIC_EXIT_THRESHOLD  = 0.4  // score must drop below this to stop recording
+const DYNAMIC_EXIT_THRESHOLD  = 0.55  // score must drop below this to stop recording
+const DYNAMIC_MIN_DISPLACEMENT = 0.05  // minimum start→end distance in world units
 
 interface DynamicTrack {
   /** Whether the trigger gesture is currently being held. */
@@ -320,10 +321,13 @@ export class DynamicEngine {
       const aMag = Math.sqrt(aDir.x ** 2 + aDir.y ** 2 + aDir.z ** 2)
       const cosine = (tMag > 0 && aMag > 0) ? dot / (tMag * aMag) : 0
 
-      print(`[DynamicEngine] ${gesture.tag} END — sim=${sim.toFixed(3)} dir=${cosine.toFixed(2)} threshold=${threshold}`)
+      const normDir  = (cosine + 1) / 2
+      const normDisp = Math.min(aMag / 0.3, 1.0)
+      const confidence = normDir * 0.5 + normDisp * 0.5
+      print(`[DynamicEngine] ${gesture.tag} END — sim=${sim.toFixed(3)} disp=${aMag.toFixed(3)} dir=${cosine.toFixed(2)} conf=${confidence.toFixed(3)} threshold=${threshold}`)
+      if (aMag < DYNAMIC_MIN_DISPLACEMENT) return null
       if (sim >= threshold) {
-        // confidence = cosine so multiple gestures are ranked by direction match
-        return { tag: gesture.tag, confidence: cosine, hand: side, state: "ended" }
+        return { tag: gesture.tag, confidence, hand: side, state: "ended" }
       }
       return null
     }
