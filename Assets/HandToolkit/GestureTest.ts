@@ -40,7 +40,7 @@ const FIST_POLICY: Policy = {
     //   similarity_threshold: 0.85,
     // },
     {
-      tag: 'plane',
+      tag: 'Plane',
       hand: 'right',
       conditions: [
         { type: 'finger_shape', finger: 'middle', metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
@@ -77,7 +77,7 @@ const FIST_POLICY: Policy = {
     //   similarity_threshold: 0.7,
     // },
     {
-      tag: 'fighton',
+      tag: 'Fight On',
       hand: 'right',
       conditions: [
         { type: 'finger_shape', finger: 'index',  metric: 'fullCurl', target: 0.1, upperTolerance: 0.15, lowerTolerance: 0.1 },
@@ -95,7 +95,7 @@ const FIST_POLICY: Policy = {
       similarity_threshold: 0.7,
     },
     {
-      tag: 'flying',
+      tag: 'Flying',
       hand: 'right',
       conditions: [
         { type: 'finger_shape', finger: 'middle', metric: 'fullCurl', target: 0.8, upperTolerance: 0.2, lowerTolerance: 0.2 },
@@ -116,7 +116,7 @@ const FIST_POLICY: Policy = {
       similarity_threshold: 0.85,
     },
         {
-      tag: 'fours_up',
+      tag: 'Fours Up',
       hand: 'left',
       conditions: [
         { type: 'finger_shape', finger: 'middle', metric: 'fullCurl', target: 0.1, upperTolerance: 0.08, lowerTolerance: 0.05 },

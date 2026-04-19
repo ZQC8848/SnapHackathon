@@ -30,6 +30,7 @@
     countdownSeconds: false
     enableLogging: false
     recordingSeconds: false
+    sceneObjectToDisableOnStop: false
     sender: false
     statusText: false
   ScriptTypesHidden:
@@ -47,6 +48,7 @@
       autoStartRecording: false
       statusText: !<reference.Text> 00000000-0000-0000-0000-000000000000
       enableLogging: true
+      sceneObjectToDisableOnStop: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
   ScriptTypes:
     -
       {}
@@ -57,3 +59,4 @@
     - '// @input bool autoStartRecording {"hint":"Start recording automatically on start"}'
     - '// @input Component.Text statusText {"hint":"Optional Text component for recording status"}'
     - '// @input bool enableLogging = true {"hint":"Enable debug logs"}'
+    - '// @input SceneObject sceneObjectToDisableOnStop {"hint":"Optional SceneObject to disable when recording ends"}'

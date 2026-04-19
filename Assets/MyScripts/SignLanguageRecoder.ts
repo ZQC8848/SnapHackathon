@@ -44,7 +44,13 @@ export class SignLanguageRecoder extends BaseScriptComponent {
     @hint("Enable debug logs")
     enableLogging: boolean = true
 
+    @input
+    @allowUndefined
+    @hint("Optional SceneObject to disable when recording ends")
+    sceneObjectToDisableOnStop: SceneObject | undefined
+
     private updateEvent: UpdateEvent | null = null
+    private readyResetEvent: DelayedCallbackEvent | null = null
 
     private leftHand: TrackedHand | null = null
     private rightHand: TrackedHand | null = null
@@ -108,7 +114,7 @@ export class SignLanguageRecoder extends BaseScriptComponent {
         if (this.autoStartRecording) {
             this.startRecording()
         } else {
-            this.setStatus("Ready")
+            this.setStatus("Ready to Record")
         }
     }
 
@@ -202,6 +208,10 @@ export class SignLanguageRecoder extends BaseScriptComponent {
         this.phase = "idle"
         this.log("Recording stopped: " + this.frames.length + " frames")
 
+        if (this.sceneObjectToDisableOnStop) {
+            this.sceneObjectToDisableOnStop.enabled = false
+        }
+
         const payload = {
             type: "hand_animation",
             name: "recording_" + Date.now(),
@@ -226,6 +236,22 @@ export class SignLanguageRecoder extends BaseScriptComponent {
             this.setStatus("Hand channel disabled")
             this.log("Animation blocked: hand channel disabled")
         }
+
+        this.scheduleReadyStatusReset()
+    }
+
+    private scheduleReadyStatusReset() {
+        if (!this.readyResetEvent) {
+            this.readyResetEvent = this.createEvent("DelayedCallbackEvent")
+            this.readyResetEvent.bind(() => {
+                // Only overwrite status when no new countdown/recording has started.
+                if (this.phase === "idle") {
+                    this.setStatus("Ready to Record")
+                }
+            })
+        }
+
+        this.readyResetEvent.reset(1.0)
     }
 
     private captureHandPose(hand: TrackedHand): HandPose {
